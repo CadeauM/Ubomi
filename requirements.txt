@@ -1,6 +1,7 @@
-
+Flask
+Flask-Cors
+gunicorn 
 python-dotenv
 ollama
 pandas
-Flask
-flask-Cors
+Flask-SQLAlchemy
