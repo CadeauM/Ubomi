@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onboarding - Smart Health Chat</title>
+
+<link rel="stylesheet" href="/static/css/global.css">
+<link rel="stylesheet" href="/static/css/onboarding.css">
+
+</head>
+<body>
+  <main class="onboarding-container">
+    <div class="onboarding-card">
+      <h2>Welcome to Smart Health</h2>
+      <p class="subtitle">Let’s set up your preferences</p>
+
+      <form id="onboarding-form">
+        <div class="form-group">
+          <label for="language">Choose your language</label>
+          <select id="language" name="language" required>
+            <option value="">Select language</option>
+            <option value="en">English</option>
+            <option value="xh">isiXhosa</option>
+            <option value="zu">isiZulu</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Preferred connection</label>
+          <div class="options">
+            <label><input type="radio" name="connection" value="whatsapp" required> WhatsApp</label>
+            <label><input type="radio" name="connection" value="sms"> SMS</label>
+            <label><input type="radio" name="connection" value="ussd"> USSD</label>
+            <label><input type="radio" name="connection" value="web"> Web App</label>
+          </div>
+        </div>
+
+        <button type="submit">Continue</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="/static/js/onboarding.js"></script>
+</body>
+</html>

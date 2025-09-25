@@ -6,16 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
     const feedbackMessage = document.getElementById('feedback-message');
 
-    loginForm.addEventListener('submit', async (event) => {
+    loginForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
         
-        if (username && password) { 
+        // Simple login check (replace with real auth later)
+        if (username === 'user' && password === 'password') {
             handleLoginSuccess();
         } else {
-            handleLoginFailure("Please enter a username and password.");
+            handleLoginFailure();
         }
     });
 
@@ -24,17 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackMessage.className = 'success';
         feedbackMessage.style.display = 'block';
 
-        // Storing username for the dashboard to use
-        localStorage.setItem('username', usernameInput.value.trim());
-
         setTimeout(() => {
-            window.location.href = '/dashboard'; 
+            // Redirect to onboarding page instead of dashboard
+            window.location.href = 'onboarding.html'; 
         }, 1000);
     }
 
-    function handleLoginFailure(message) {
-        feedbackMessage.textContent = message || 'Invalid username or password.';
+    function handleLoginFailure() {
+        feedbackMessage.textContent = 'Invalid username or password. Please try again.';
         feedbackMessage.className = 'error';
         feedbackMessage.style.display = 'block';
+        passwordInput.value = '';
+        usernameInput.focus();
     }
 });

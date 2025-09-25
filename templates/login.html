@@ -9,15 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="/static/css/global.css">
+    <link rel="stylesheet" href="/static/css/auth.css">
 </head>
 <body>
     <main class="auth-container">
         <div class="login-card">
             <div class="logo-container">
                 
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Smart Health Chat Logo" class="logo">
+                <img src="/static/img/logo.png" alt="Smart Health Chat Logo" class="logo">
             </div>
             
             <p class="welcome-text">Log in to your account</p>
@@ -38,12 +38,12 @@
             </form>
 
             <div class="signup-link">
-                <p>Don't have an account? <a href="{{ url_for('main.signup_page') }}">Sign Up</a></p>
+                <p>Don't have an account? <a href="/templates/signup.html">Sign Up</a></p>
             </div>
         </div>
     </main>
     
-    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script src="/static/js/login.js"></script>
 
 </body>
 </html>
