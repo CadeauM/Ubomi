@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         Stressed: document.getElementById('stressed-count'),
     };
     
-    // Function to fetch and display health data
     async function loadHealthData() {
         try {
             const response = await fetch('/api/health-data', {

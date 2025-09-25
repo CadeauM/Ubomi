@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') sendMessage();
   });
 
-  // Suggestion cards insert text
+
   suggestions.forEach(card => {
     card.addEventListener('click', () => {
       chatInput.value = card.textContent;
