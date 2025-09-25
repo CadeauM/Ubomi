@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
+   
     const username = localStorage.getItem('username');
     const token = localStorage.getItem('accessToken');
 
-    // If user is not logged in, redirect to login page
     if (!username || !token) {
         window.location.href = '/login';
         return;
     }
 
-    // Personalize the page
-    document.getElementById('username-display').textContent = username;
-
+    const usernameDisplay = document.getElementById('username-display');
+    const emailDisplay = document.getElementById('email-display');
     const moodForm = document.getElementById('mood-form');
     const energySlider = document.getElementById('energy-slider');
     const energyValue = document.getElementById('energy-value');
@@ -23,6 +22,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         Stressed: document.getElementById('stressed-count'),
     };
     
+    async function loadUserProfile() {
+        try {
+            const response = await fetch('/api/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                localStorage.clear();
+                window.location.href = '/login';
+                return;
+            }
+
+            const data = await response.json();
+            usernameDisplay.textContent = data.username;
+            emailDisplay.textContent = data.email;
+
+        } catch (error) {
+            console.error('Failed to load profile:', error);
+            usernameDisplay.textContent = "User";
+            emailDisplay.textContent = "N/A";
+        }
+    }
+
     async function loadHealthData() {
         try {
             const response = await fetch('/api/health-data', {
@@ -32,10 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const data = await response.json();
             
-            // Reset counters
             Object.values(moodCounters).forEach(counter => counter.textContent = '0');
 
-            // Update counters based on fetched data
             data.forEach(item => {
                 if (moodCounters[item.mood]) {
                     moodCounters[item.mood].textContent = parseInt(moodCounters[item.mood].textContent) + 1;
@@ -46,15 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Initial load of data
-    await loadHealthData();
-
-    // Event listener for energy slider
-    energySlider.addEventListener('input', () => {
-        energyValue.textContent = energySlider.value;
-    });
-
-    // Handle form submission
     moodForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const mood = document.getElementById('mood-select').value;
@@ -73,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok) {
                 analysisMessage.textContent = `Your check-in has been saved successfully!`;
-                await loadHealthData(); // Reload the data to update stats
+                await loadHealthData(); 
                 moodForm.reset();
                 energySlider.value = 5;
                 energyValue.textContent = 5;
@@ -84,4 +95,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             analysisMessage.textContent = 'Error connecting to the server.';
         }
     });
+    
+    energySlider.addEventListener('input', () => {
+        energyValue.textContent = energySlider.value;
+    });
+
+
+    await loadUserProfile();
+    await loadHealthData();
 });

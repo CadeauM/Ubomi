@@ -1,4 +1,3 @@
-# app.py
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -13,7 +12,7 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     CORS(app)
-
+    
     db_url = os.environ.get('DATABASE_URL')
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -29,12 +28,18 @@ def create_app():
     def api_register():
         data = request.get_json()
         username = data.get('username')
+        email = data.get('email') # <-- Get email
         password = data.get('password')
-        if not username or not password:
-            return jsonify({"message": "Username and password are required."}), 400
+
+        if not all([username, email, password]):
+            return jsonify({"message": "Username, email, and password are required."}), 400
+
         if User.query.filter_by(username=username).first():
             return jsonify({"message": "Username already exists."}), 409
-        new_user = User(username=username)
+        if User.query.filter_by(email=email).first():
+            return jsonify({"message": "Email is already registered."}), 409
+
+        new_user = User(username=username, email=email) # <-- Add email to new user
         new_user.password = password
         db.session.add(new_user)
         db.session.commit()
@@ -50,33 +55,40 @@ def create_app():
             return jsonify({"message": "Login successful!", "access_token": f"{username}-token"}), 200
         else:
             return jsonify({"message": "Invalid credentials"}), 401
+   
+    @app.route('/api/profile', methods=['GET'])
+    def api_profile():
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({"message": "Unauthorized"}), 401
+        
+        token = auth_header.split(' ')[1]
+        username = token.split('-token')[0]
+
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+        
+        return jsonify({
+            "username": user.username,
+            "email": user.email
+        })
 
     @app.route('/api/health-data', methods=['GET', 'POST'])
     def api_health_data():
         auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({"message": "Unauthorized"}), 401
+        if not auth_header or not auth_header.startswith('Bearer '): return jsonify({"message": "Unauthorized"}), 401
         token = auth_header.split(' ')[1]
         username = token.split('-token')[0]
-
         if request.method == 'POST':
             data = request.get_json()
-            new_entry = HealthData(
-                username=username,
-                mood=data.get('mood'),
-                energy=data.get('energy'),
-                symptoms=data.get('symptoms')
-            )
+            new_entry = HealthData(username=username, mood=data.get('mood'), energy=data.get('energy'), symptoms=data.get('symptoms'))
             db.session.add(new_entry)
             db.session.commit()
             return jsonify({"success": True, "message": "Health data added."})
-            
         elif request.method == 'GET':
             history = HealthData.query.filter_by(username=username).order_by(HealthData.timestamp.desc()).all()
-            history_list = [
-                {"timestamp": item.timestamp.isoformat(), "mood": item.mood, "energy": item.energy, "symptoms": item.symptoms}
-                for item in history
-            ]
+            history_list = [{"timestamp": item.timestamp.isoformat(), "mood": item.mood, "energy": item.energy, "symptoms": item.symptoms} for item in history]
             return jsonify(history_list)
 
     @app.route('/api/chat', methods=['POST'])

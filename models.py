@@ -11,7 +11,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     username = db.Column(db.String(80), primary_key=True, nullable=False)
-    # The password column will store a HASH, not the actual password
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
     @property
@@ -20,11 +20,9 @@ class User(db.Model):
 
     @password.setter
     def password(self, password):
-        """Hashes the password and stores it."""
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
-        """Checks if a provided password matches the stored hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
 
 class HealthData(db.Model):
