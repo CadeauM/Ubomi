@@ -1,20 +1,21 @@
+// js/login.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const feedbackMessage = document.getElementById('feedback-message');
 
-    loginForm.addEventListener('submit', (event) => {
+    loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
         
-        // Simple login check (replace with real auth later)
-        if (username === 'user' && password === 'password') {
+        if (username && password) { 
             handleLoginSuccess();
         } else {
-            handleLoginFailure();
+            handleLoginFailure("Please enter a username and password.");
         }
     });
 
@@ -23,17 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackMessage.className = 'success';
         feedbackMessage.style.display = 'block';
 
+        // Storing username for the dashboard to use
+        localStorage.setItem('username', usernameInput.value.trim());
+
         setTimeout(() => {
-            // Redirect to dashboard page
-            window.location.href = 'dashboard.html'; 
+            window.location.href = '/dashboard'; 
         }, 1000);
     }
 
-    function handleLoginFailure() {
-        feedbackMessage.textContent = 'Invalid username or password. Please try again.';
+    function handleLoginFailure(message) {
+        feedbackMessage.textContent = message || 'Invalid username or password.';
         feedbackMessage.className = 'error';
         feedbackMessage.style.display = 'block';
-        passwordInput.value = '';
-        usernameInput.focus();
     }
 });
