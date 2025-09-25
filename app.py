@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 from flask_cors import CORS
 from utils.database import init_db, add_user, check_user, add_health_data, get_health_data, get_last_mood
 from utils.analysis import analyze_mood
+from groq import Groq
 import os
 import ollama
 
@@ -55,6 +56,12 @@ def api_chat():
     user_message = data.get('message')
     history = data.get('history', [])
 
+    # Make sure you have set the GROQ_API_KEY in your Render environment
+    if not os.environ.get("GROQ_API_KEY"):
+        return jsonify({"error": "GROQ_API_KEY is not configured on the server."}), 500
+
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+    
     system_prompt = {
         "role": "system",
         "content": "You are Smart Health, a South African AI-powered mental health assistant designed to provide supportive and informative responses. Respond empathetically and professionally, offering general advice and encouraging users to seek professional help when needed."
@@ -63,15 +70,14 @@ def api_chat():
     messages = [system_prompt] + history + [{'role': 'user', 'content': user_message}]
 
     try:
-        response = ollama.chat(
-            model='mistral',
-            messages=messages
+        chat_completion = client.chat.completions.create(
+            messages=messages,
+            model="llama3-8b-8192", # A great, fast model available on Groq
         )
-        return jsonify({"reply": response['message']['content']})
+        return jsonify({"reply": chat_completion.choices[0].message.content})
     except Exception as e:
-        print(f"Error communicating with Ollama: {e}")
-        return jsonify({"error": "Could not connect to the chat model. Is the Ollama server running?"}), 500
-
+        print(f"Error communicating with Groq API: {e}")
+        return jsonify({"error": "Could not connect to the chat API."}), 500
 @app.route('/api/health-data', methods=['GET', 'POST'])
 def api_health_data():
     auth_header = request.headers.get('Authorization')
