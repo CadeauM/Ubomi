@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Smart Health Chat</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+    <main class="auth-container">
+        <div class="login-card">
+            
+            <div class="logo-container">
+                
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Smart Health Chat Logo" class="logo">
+            </div>
+            
+            <p class="welcome-text">Create your account</p>
+            
+            <form id="signup-form" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required>
+                    
+                    <div id="password-requirements">
+                        <ul>
+                            <li id="req-length">At least 8 characters</li>
+                            <li id="req-lowercase">A lowercase letter (a-z)</li>
+                            <li id="req-uppercase">An uppercase letter (A-Z)</li>
+                            <li id="req-number">A number (0-9)</li>
+                            <li id="req-special">A special character (!@#$)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                </div>
+                
+                <div id="feedback-message"></div>
+                <button type="submit">Sign Up</button>
+            </form>
+
+            <div class="signup-link">
+                
+                <p>Already have an account? <a href="{{ url_for('main.login_page') }}">Log In</a></p>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+
+</body>
+</html>

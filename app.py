@@ -1,108 +1,70 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
-from flask_cors import CORS
-from utils.database import init_db, add_user, check_user, add_health_data, get_health_data, get_last_mood
-from utils.analysis import analyze_mood
-from groq import Groq
 import os
-import ollama
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from groq import Groq
+from dotenv import load_dotenv
 
-app = Flask(__name__)
-CORS(app)
-app.secret_key = os.urandom(24)
+# Import our routes blueprint
+from routes import main_bp 
 
-init_db()
+load_dotenv()
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+def create_app():
+    app = Flask(__name__)
+    CORS(app) # Allow our frontend to talk to our backend
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
+    # --- Register Blueprints ---
+    # This tells Flask to use all the routes we defined in routes.py
+    app.register_blueprint(main_bp)
 
-@app.route('/chat')
-def chat():
-    return render_template('chat.html')
+    # --- API Routes ---
+    # This is the backend logic that our JavaScript will call.
 
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
-        return jsonify({"message": "Username and password are required."}), 400
-    
-    if add_user(username, password):
+    @app.route('/api/register', methods=['POST'])
+    def api_register():
+        # We will add database logic here later
         return jsonify({"message": "User registered successfully."}), 201
-    else:
-        return jsonify({"message": "Username already exists."}), 409
 
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    if check_user(username, password):
-        # In a real app, you would use JWTs.
-        # For now, we'll use a simple token.
-        return jsonify({"message": "Login successful!", "access_token": f"{username}-token"}), 200
-    else:
-        return jsonify({"message": "Invalid credentials"}), 401
-
-@app.route('/api/chat', methods=['POST'])
-def api_chat():
-    data = request.get_json()
-    user_message = data.get('message')
-    history = data.get('history', [])
-
-    # Make sure you have set the GROQ_API_KEY in your Render environment
-    if not os.environ.get("GROQ_API_KEY"):
-        return jsonify({"error": "GROQ_API_KEY is not configured on the server."}), 500
-
-    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-    
-    system_prompt = {
-        "role": "system",
-        "content": "You are Smart Health, a South African AI-powered mental health assistant designed to provide supportive and informative responses. Respond empathetically and professionally, offering general advice and encouraging users to seek professional help when needed."
-    }
-
-    messages = [system_prompt] + history + [{'role': 'user', 'content': user_message}]
-
-    try:
-        chat_completion = client.chat.completions.create(
-            messages=messages,
-            model="llama3-8b-8192", # A great, fast model available on Groq
-        )
-        return jsonify({"reply": chat_completion.choices[0].message.content})
-    except Exception as e:
-        print(f"Error communicating with Groq API: {e}")
-        return jsonify({"error": "Could not connect to the chat API."}), 500
-@app.route('/api/health-data', methods=['GET', 'POST'])
-def api_health_data():
-    auth_header = request.headers.get('Authorization')
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return jsonify({"message": "Unauthorized"}), 401
-    
-    token = auth_header.split(' ')[1]
-    # In a real app, you'd verify the JWT. Here we do a simple check.
-    username = token.split('-token')[0]
-
-    if request.method == 'POST':
+    @app.route('/api/login', methods=['POST'])
+    def api_login():
+        # We will add database logic here later
         data = request.get_json()
-        mood = data.get('mood')
-        energy = data.get('energy')
-        symptoms = data.get('symptoms')
+        username = data.get('username')
+        # For now, let's just let anyone log in for testing
+        return jsonify({"message": "Login successful!", "access_token": f"{username}-token"}), 200
+
+    @app.route('/api/chat', methods=['POST'])
+    def api_chat():
+        data = request.get_json()
+        user_message = data.get('message')
+        history = data.get('history', [])
+
+        if not os.environ.get("GROQ_API_KEY"):
+            return jsonify({"error": "GROQ_API_KEY is not configured on the server."}), 500
+
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
         
-        if add_health_data(username, mood, energy, symptoms):
-            analysis = analyze_mood(username, mood, symptoms)
-            return jsonify({"success": True, "message": "Health data added.", "analysis": analysis})
-        else:
-            return jsonify({"success": False, "message": "Failed to add health data."}), 500
-            
-    elif request.method == 'GET':
-        history = get_health_data(username)
-        return jsonify(history)
+        system_prompt = {
+            "role": "system",
+            "content": "You are Smart Health, a South African AI-powered mental health assistant..." # Truncated for brevity
+        }
+        messages = [system_prompt] + history + [{'role': 'user', 'content': user_message}]
+
+        try:
+            chat_completion = client.chat.completions.create(
+                messages=messages,
+                model="llama3-8b-8192",
+            )
+            return jsonify({"reply": chat_completion.choices[0].message.content})
+        except Exception as e:
+            print(f"Error communicating with Groq API: {e}")
+            return jsonify({"error": "Could not connect to the chat API."}), 500
+
+    # We will add the /api/health-data route back in the next step!
+
+    return app
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

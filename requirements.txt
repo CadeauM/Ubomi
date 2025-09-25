@@ -2,7 +2,6 @@ Flask
 Flask-Cors
 gunicorn 
 python-dotenv
-ollama
 pandas
 Flask-SQLAlchemy
 groq

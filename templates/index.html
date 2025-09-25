@@ -3,37 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Health Chat</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Smart Health Chat - Your AI Mental Wellness Companion</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
-    <div id="app">
-        <!-- Login/Register View -->
-        <div id="auth-view">
-            <div class="auth-container">
-                <h1 class="app-title">🩺 Smart Health Chat</h1>
-                <div id="login-form-container">
-                    <h2>Login</h2>
-                    <form id="login-form">
-                        <input type="text" id="login-username" placeholder="Username" required>
-                        <input type="password" id="login-password" placeholder="Password" required>
-                        <button type="submit">Login</button>
-                    </form>
-                    <p>Don't have an account? <a href="#" id="show-register">Register here</a>.</p>
-                </div>
-                <div id="register-form-container" style="display: none;">
-                    <h2>Register</h2>
-                    <form id="register-form">
-                        <input type="text" id="register-username" placeholder="Choose a username" required>
-                        <input type="password" id="register-password" placeholder="Choose a password" required>
-                        <button type="submit">Register</button>
-                    </form>
-                    <p>Already have an account? <a href="#" id="show-login">Login here</a>.</p>
-                </div>
-                <p id="auth-message" class="message"></p>
-            </div>
+<div class="page-wrapper">
+
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+
+                <a href="{{ url_for('main.index') }}" class="logo-text">Smart Health</a>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#testimonial">Testimonial</a></li>
+                    <li><a href="{{ url_for('main.login_page') }}">Log In</a></li>
+                    <li><a href="{{ url_for('main.signup_page') }}" class="btn btn-primary">Sign Up</a></li>
+                </ul>
+            </nav>
         </div>
-    </div>
-    <script src="/static/js/main.js"></script>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content animate-on-scroll">
+                    <h1>A Safe Space to Talk, Anytime You Need.</h1>
+                    <p>Smart Health Chat is an AI-powered companion designed to listen, support, and guide you on your mental wellness journey. Confidential, accessible, and always here for you.</p>
+                    <a href="{{ url_for('main.signup_page') }}" class="btn btn-primary">Get Started For Free</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="section">
+            <div class="container">
+                <h2 class="section-title animate-on-scroll">How We Can Help</h2>
+                <p class="section-subtitle animate-on-scroll">Discover the tools and support system designed for your well-being.</p>
+                <div class="features-grid">
+                    <div class="feature-card animate-on-scroll">
+                        <div class="icon"><i data-feather="message-circle"></i></div>
+                        <h3>24/7 AI Support</h3>
+                        <p>Our AI is trained to provide empathetic and constructive conversations whenever you feel overwhelmed, anxious, or just need to talk.</p>
+                    </div>
+                    <div class="feature-card animate-on-scroll">
+                        <div class="icon"><i data-feather="shield"></i></div>
+                        <h3>Private & Secure</h3>
+                        <p>Your conversations are completely confidential. We prioritize your privacy so you can express yourself freely and without judgment.</p>
+                    </div>
+                    <div class="feature-card animate-on-scroll">
+                        <div class="icon"><i data-feather="trending-up"></i></div>
+                        <h3>Guided Resources</h3>
+                        <p>Receive recommendations for mindfulness exercises, coping strategies, and articles to help you build resilience and improve your mental health.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonial" class="section">
+            <div class="container animate-on-scroll">
+                <h2 class="section-title">A Word From Our Users</h2>
+                <div class="testimonial-card">
+                    <p>"Using Smart Health Chat has been a game-changer for my anxiety. Having a non-judgmental space to unload my thoughts at any time of day has been incredibly valuable."</p>
+                    <div class="author">- Alex P.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cta" class="section">
+            <div class="container animate-on-scroll">
+                <h2 class="section-title">Ready to take the first step?</h2>
+                <p class="section-subtitle">Join thousands of others on the path to better mental well-being. Your journey starts now.</p>
+                <a href="{{ url_for('main.signup_page') }}" class="btn btn-primary">Create Your Free Account</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Smart Health. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</div>
+    <script src="{{ url_for('static', filename='js/scroll-animation.js') }}"></script>
+    <script>
+      feather.replace()
+    </script>
 </body>
 </html>
