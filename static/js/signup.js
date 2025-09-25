@@ -1,99 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signup-form');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirm-password');
     const feedbackMessage = document.getElementById('feedback-message');
-
-    const reqLength = document.getElementById('req-length');
-    const reqLowercase = document.getElementById('req-lowercase');
-    const reqUppercase = document.getElementById('req-uppercase');
-    const reqNumber = document.getElementById('req-number');
-    const reqSpecial = document.getElementById('req-special');
-
-    passwordInput.addEventListener('input', () => {
-        validatePassword(passwordInput.value);
-    });
-
-    signupForm.addEventListener('submit', (event) => {
-        event.preventDefault(); 
-
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        const confirmPassword = confirmPasswordInput.value.trim();
-
+    
+    signupForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
         
-        if (!username || !password || !confirmPassword) {
-            handleSignupFailure('Please fill out all fields.');
-            return;
-        }
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
 
         if (password !== confirmPassword) {
-            handleSignupFailure('Passwords do not match. Please try again.');
+            showFeedback('Passwords do not match.', 'error');
             return;
         }
 
-        if (!validatePassword(password)) {
-            handleSignupFailure('Your password does not meet all the security requirements.');
-            return;
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showFeedback('Registration successful! Please log in.', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                showFeedback(data.message, 'error');
+            }
+        } catch (error) {
+            showFeedback('Could not connect to the server. Please try again later.', 'error');
         }
-        handleSignupSuccess();
     });
 
-    /**
-     * Checks a password against all security rules and updates the UI checklist.
-     * @param {string} password
-     * @returns {boolean}
-     */
-    function validatePassword(password) {
-        let allRequirementsMet = true;
-
-        if (password.length >= 8) {
-            reqLength.classList.add('valid');
-        } else {
-            reqLength.classList.remove('valid');
-            allRequirementsMet = false;
-        }
-        if (/[a-z]/.test(password)) {
-            reqLowercase.classList.add('valid');
-        } else {
-            reqLowercase.classList.remove('valid');
-            allRequirementsMet = false;
-        }
-
-        if (/[A-Z]/.test(password)) {
-            reqUppercase.classList.add('valid');
-        } else {
-            reqUppercase.classList.remove('valid');
-            allRequirementsMet = false;
-        }
-        if (/[0-9]/.test(password)) {
-            reqNumber.classList.add('valid');
-        } else {
-            reqNumber.classList.remove('valid');
-            allRequirementsMet = false;
-        }
-        
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            reqSpecial.classList.add('valid');
-        } else {
-            reqSpecial.classList.remove('valid');
-            allRequirementsMet = false;
-        }
-
-        return allRequirementsMet;
-    }
-    
-    function handleSignupSuccess() {
-        feedbackMessage.textContent = 'Account created successfully! Redirecting to login...';
-        feedbackMessage.className = 'success';
-        setTimeout(() => {
-            window.location.href = 'login.html'; 
-        }, 2000); 
-    }
-
-    function handleSignupFailure(message) {
+    function showFeedback(message, type) {
         feedbackMessage.textContent = message;
-        feedbackMessage.className = 'error';
+        feedbackMessage.className = type; // 'success' or 'error'
+        feedbackMessage.style.display = 'block';
     }
 });

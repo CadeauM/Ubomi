@@ -5,3 +5,5 @@ python-dotenv
 pandas
 Flask-SQLAlchemy
 groq
+psycopg2-binary
+Flask-Bcrypt 

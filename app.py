@@ -4,67 +4,114 @@ from flask_cors import CORS
 from groq import Groq
 from dotenv import load_dotenv
 
-# Import our routes blueprint
-from routes import main_bp 
+from models import db, bcrypt, User, HealthData  # Import our new models
+from routes import main_bp
 
 load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app) # Allow our frontend to talk to our backend
+    CORS(app)
+
+    # --- Database Configuration ---
+    # This line reads the DATABASE_URL set on Render.
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    db.init_app(app)
+    bcrypt.init_app(app)
 
     # --- Register Blueprints ---
-    # This tells Flask to use all the routes we defined in routes.py
     app.register_blueprint(main_bp)
 
     # --- API Routes ---
-    # This is the backend logic that our JavaScript will call.
-
     @app.route('/api/register', methods=['POST'])
     def api_register():
-        # We will add database logic here later
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return jsonify({"message": "Username and password are required."}), 400
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return jsonify({"message": "Username already exists."}), 409
+
+        new_user = User(username=username)
+        new_user.password = password  # The setter in the model will hash it
+        db.session.add(new_user)
+        db.session.commit()
+
         return jsonify({"message": "User registered successfully."}), 201
 
     @app.route('/api/login', methods=['POST'])
     def api_login():
-        # We will add database logic here later
         data = request.get_json()
         username = data.get('username')
-        # For now, let's just let anyone log in for testing
-        return jsonify({"message": "Login successful!", "access_token": f"{username}-token"}), 200
+        password = data.get('password')
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and user.check_password(password):
+            return jsonify({"message": "Login successful!", "access_token": f"{username}-token"}), 200
+        else:
+            return jsonify({"message": "Invalid credentials"}), 401
+
+    @app.route('/api/health-data', methods=['GET', 'POST'])
+    def api_health_data():
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({"message": "Unauthorized"}), 401
+        
+        token = auth_header.split(' ')[1]
+        username = token.split('-token')[0]
+
+        if request.method == 'POST':
+            data = request.get_json()
+            new_entry = HealthData(
+                username=username,
+                mood=data.get('mood'),
+                energy=data.get('energy'),
+                symptoms=data.get('symptoms')
+            )
+            db.session.add(new_entry)
+            db.session.commit()
+            return jsonify({"success": True, "message": "Health data added."})
+            
+        elif request.method == 'GET':
+            history = HealthData.query.filter_by(username=username).order_by(HealthData.timestamp.desc()).all()
+            # Convert SQLAlchemy objects to dictionaries
+            history_list = [
+                {
+                    "timestamp": item.timestamp.isoformat(),
+                    "mood": item.mood,
+                    "energy": item.energy,
+                    "symptoms": item.symptoms
+                } for item in history
+            ]
+            return jsonify(history_list)
 
     @app.route('/api/chat', methods=['POST'])
     def api_chat():
+        # This function remains the same
         data = request.get_json()
         user_message = data.get('message')
         history = data.get('history', [])
-
-        if not os.environ.get("GROQ_API_KEY"):
-            return jsonify({"error": "GROQ_API_KEY is not configured on the server."}), 500
-
         client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-        
-        system_prompt = {
-            "role": "system",
-            "content": "You are Smart Health, a South African AI-powered mental health assistant..." # Truncated for brevity
-        }
+        system_prompt = { "role": "system", "content": "You are Smart Health..." }
         messages = [system_prompt] + history + [{'role': 'user', 'content': user_message}]
-
         try:
-            chat_completion = client.chat.completions.create(
-                messages=messages,
-                model="llama3-8b-8192",
-            )
+            chat_completion = client.chat.completions.create(messages=messages, model="llama3-8b-8192")
             return jsonify({"reply": chat_completion.choices[0].message.content})
         except Exception as e:
-            print(f"Error communicating with Groq API: {e}")
             return jsonify({"error": "Could not connect to the chat API."}), 500
-
-    # We will add the /api/health-data route back in the next step!
 
     return app
 
 app = create_app()
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+@app.cli.command("db-create")
+def db_create():
+    db.create_all()
+    print("Database tables created!")

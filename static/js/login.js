@@ -1,21 +1,32 @@
-// js/login.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
     const feedbackMessage = document.getElementById('feedback-message');
 
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
         
-        if (username && password) { 
-            handleLoginSuccess();
-        } else {
-            handleLoginFailure("Please enter a username and password.");
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Store token and username for other pages to use
+                localStorage.setItem('accessToken', data.access_token);
+                localStorage.setItem('username', username);
+                handleLoginSuccess();
+            } else {
+                handleLoginFailure(data.message);
+            }
+        } catch (error) {
+            handleLoginFailure('Could not connect to the server.');
         }
     });
 
@@ -23,17 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackMessage.textContent = 'Login successful! Redirecting...';
         feedbackMessage.className = 'success';
         feedbackMessage.style.display = 'block';
-
-        // Storing username for the dashboard to use
-        localStorage.setItem('username', usernameInput.value.trim());
-
-        setTimeout(() => {
-            window.location.href = '/dashboard'; 
-        }, 1000);
+        setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
     }
 
     function handleLoginFailure(message) {
-        feedbackMessage.textContent = message || 'Invalid username or password.';
+        feedbackMessage.textContent = message;
         feedbackMessage.className = 'error';
         feedbackMessage.style.display = 'block';
     }
