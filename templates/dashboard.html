@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="dashboard-view">
+    <h1>Welcome, <span id="username-display"></span>!</h1>
+    
+    <div id="mood-form-container">
+        <h2>How are you feeling today?</h2>
+        <form id="mood-form">
+            <select id="mood-select" required>
+                <option value="Happy">Happy</option>
+                <option value="Neutral">Neutral</option>
+                <option value="Sad">Sad</option>
+                <option value="Anxious">Anxious</option>
+                <option value="Stressed">Stressed</option>
+            </select>
+            <label for="energy-slider">Energy (1-10)</label>
+            <input type="range" id="energy-slider" min="1" max="10" value="5">
+            <textarea id="symptoms-text" placeholder="Any symptoms or notes?"></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div id="analysis-container" class="message"></div>
+
+</div>
+{% endblock %}

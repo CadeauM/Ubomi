@@ -1,0 +1,6 @@
+
+python-dotenv
+ollama
+pandas
+Flask
+flask-Cors

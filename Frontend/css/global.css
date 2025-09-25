@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display.swap');
+
+:root {
+    --primary-blue: #4F46E5;
+    --primary-blue-gradient-end: #6366F1;
+    --logo-bg-color: #FFFFFF;
+
+    --bg-gradient-start: #6a8fa1;
+    --bg-gradient-end: #D6EAF8;
+    
+    --card-bg-color: #FFFFFF;
+    --border-color: #D1D5DB;
+    --text-color-primary: #111827;
+    --text-color-secondary: #6B7280;
+    --error-color: #E53E3E;
+    --success-color: #38A169;
+
+    --font-family: 'Inter', sans-serif;
+    --border-radius: 8px;
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --transition-speed: 0.3s ease;
+}
